@@ -25,5 +25,6 @@ int main(){
         cout << "Press any key to continue, Press e to exit..." << endl;
         cin >> a;
         system("cls");
+        cin.ignore();
     }while(a != 'e');
 }
