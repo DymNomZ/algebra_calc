@@ -20,6 +20,10 @@ vector<int> Stack::get_e(){
     return stack_e;
 }
 
+void Stack::stack_clear(){
+    stack_e.clear();
+}
+
 void Stack::test_print(){
     for(int i = 0; i < stack_e.size(); i++){
         cout << stack_e[i] << " ";

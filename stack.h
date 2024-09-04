@@ -5,8 +5,6 @@ using namespace std;
 class Stack{
     vector<int> stack_e;
 
-    void test_print();
-
     public:
         Stack();
         void push(int);
@@ -15,4 +13,6 @@ class Stack{
         bool is_empty();
         int get_size();
         vector<int> get_e();
+        void test_print();
+        void stack_clear();
 };
