@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Stack sol, eval;
+Stack sol, eval, eOp_num;
 
 bool valid_parenthesis(string e){
     Stack s;
@@ -14,7 +14,7 @@ bool valid_parenthesis(string e){
         if(e[i] == ')' && s.is_empty()) return false;
         if(e[i] == '(') s.push(e[i]);
         else if(e[i] == ')'){
-            if(s.peek() == '(') s.pop();\
+            if(s.peek() == '(') s.pop();
         }
     }
     if(s.is_empty()) return true;
@@ -106,26 +106,32 @@ int perf_op(int a){
     return ans;
 }
 
-void eval_parenthesis(int x){
-    int a = x;
-    a = sol.pop();
-    cout << "Popped sol paren: " << a << endl;
-    while(a != '('){
+bool act_paren = false;
+int eOp_paren = 0;
+
+void eval_parenthesis(){
+    cout << "Elements since open parenthesis: " << eOp_paren << endl;
+    int a = 0;
+    while(eOp_paren > 0){
+        a = sol.pop();
+        cout << "Popped sol paren: " << a << endl;
+        eOp_paren--;
+        cout << "Elements since open parenthesis: " << eOp_paren << endl;
         if(is_op(a) && is_number(sol.peek())){
             cout << "Performing " << a << endl;
             a = perf_op(a);
             cout << "After: " << a << endl;
             eval.push(a);
             cout << "Pushed eval paren after: " << a << endl;
+            eOp_paren -= 2;
         }
         else if(is_number(a)){
             eval.push(a);
             cout << "Pushed eval paren number: " << a << endl;
         }
-        a = sol.pop();
-        cout << "Popped sol paren: " << a << endl;
+        
     }
-    vector<int> eval_e = eval.get_e();
+    /*vector<int> eval_e = eval.get_e();
     int z;
     for(int i = 0; i < eval_e.size(); i++){
         cout << eval_e[i] << endl;
@@ -134,9 +140,14 @@ void eval_parenthesis(int x){
             sol.push(eval_e[i]);
             cout << "Pushed sol afters: " << eval_e[i] << endl;
         }
-    }
+    }*/
+    eOp_paren = eOp_num.pop() + 1;
+    int temp = eval.pop();
+    sol.push(temp);
+    cout << "Pushed sol paren: " << temp << endl;
     eval.stack_clear();
     cout << endl;
+    act_paren = false;
 }
 
 void eval_no_parenthesis(){
@@ -172,13 +183,16 @@ void eval_exponent(int x){
 }
 
 string eval_exp(string e){
+    eOp_paren = 0;
     for(int i = 0; i < e.length(); i++){
-        // ignore space
-        if(e[i] == ' ') continue;
+
         //start of parenthesis
         if(e[i] == '('){
-            sol.push(e[i]);
-            cout << "Pushed sol: " << e[i] << endl;
+            act_paren = true;
+            eOp_num.push(eOp_paren);
+            eOp_paren = 0;
+            //sol.push(e[i]);
+            //cout << "Pushed sol: " << e[i] << endl;
         }
         else if(e[i] >= '0' && e[i] <= '9'){
             //if number has two or more digits
@@ -190,6 +204,7 @@ string eval_exp(string e){
                 sol.push(x);
                 cout << "Pushed sol >number: " << x << endl;
             }
+            //broken
             else if(!sol.is_empty() && is_op(sol.peek()) && sol.peek() == '-' && e[i-1] != ' '){
                 //negative number
                 sol.pop();
@@ -203,13 +218,14 @@ string eval_exp(string e){
                 sol.push(e[i]-'0');
                 cout << "Pushed sol reg number: " << e[i]-'0' << endl;
             }
+            if(act_paren) eOp_paren++;
         }
-        //if regular operator
         else if(is_op(e[i])){
             sol.push(e[i]);
             cout << "Pushed sol op: " << e[i] << endl;
+            if(act_paren) eOp_paren++;
         }
-        else if(e[i] == ')') eval_parenthesis(e[i]);
+        else if(e[i] == ')') eval_parenthesis();
     }
     if(!sol.is_empty() && sol.get_size() > 1) eval_no_parenthesis();
     
