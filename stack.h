@@ -1,7 +1,6 @@
 #include <vector>
 
 using namespace std;
-
 class Stack{
     vector<int> stack_e;
 

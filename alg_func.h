@@ -9,3 +9,4 @@ void eval_parenthesis(int);
 void eval_exponent(int);
 string compress_exp(string);
 string eval_exp(string);
+void input_vars(string e);
