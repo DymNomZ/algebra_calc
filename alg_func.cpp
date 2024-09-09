@@ -53,6 +53,7 @@ string compress_exp(string e){
     string compressed;
     for(int i = 0; i < e.length(); i++){
         if(e[i] == ' ')continue;
+        if(isalpha(e[i])) e[i] = tolower(e[i]);
         compressed += e[i];
     }
     return compressed;
@@ -79,6 +80,13 @@ bool valid_op_layout(string e){
     return true;
 }
 
+bool valid_vars(string e){
+    for(int i = 0; i < e.length(); i++){
+        if(!is_number(e[i]) && (e[i] < '0' || e[i] > '9') && (e[i] < 'a' || e[i] > 'z')) return false;
+    }
+    return true;
+}
+
 void input_vars(string e){
     for(int i = 0; i < e.length(); i++){
         if(isalpha(e[i])){
@@ -88,7 +96,6 @@ void input_vars(string e){
             //` is 96
             vars[e[i]-'`'] = x;
             cout << "Placed " << x << " at " << e[i] << endl;
-            e[i] = tolower(e[i]);
         }
     }
 }
