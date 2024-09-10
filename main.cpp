@@ -23,12 +23,12 @@ int main(){
         else if(!valid_op_layout(exp)) cout << "Invalid expression: Improper arrangement of operation/s" << endl << endl;
         else{
             exp = compress_exp(exp);
-            if(!valid_vars(exp)) cout << "Invalid expression: invalid variable character" << endl << endl;
-            else{
+            //if(!valid_vars(exp)) cout << "Invalid expression: invalid variable character" << endl << endl;
+            //else{
                 input_vars(exp);
                 cout << "Answer: " << endl;
                 cout << eval_exp(exp) << endl << endl;
-            }
+            //}
         }
 
         cout << "Press any key to continue, Press e to exit..." << endl;

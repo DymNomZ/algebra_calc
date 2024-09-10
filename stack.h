@@ -1,17 +1,23 @@
+#pragma once
 #include <vector>
+#include "element.h" 
 
 using namespace std;
+
+template<typename T>
 class Stack{
-    vector<int> stack_e;
+    vector<T> stack_e;
 
     public:
         Stack();
-        void push(int);
-        int pop();
-        int peek();
+        void push(T);
+        T pop();
+        T peek();
         bool is_empty();
         int get_size();
-        vector<int> get_e();
+        vector<T> get_e();
         void test_print();
         void stack_clear();
 };
+
+#include "stack.dpp"

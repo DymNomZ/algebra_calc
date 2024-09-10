@@ -2,17 +2,19 @@
 #include <string>
 #include <vector>
 #include "stack.h"
+#include "element.h"
 
 using namespace std;
 
-Stack sol, eval, eOp_num, ops;
+Stack<Element> sol, eval;
+Stack<int> eOp_num;
 bool act_paren = false;
 int eOp_paren = 0, num_Op_paren = 0;
 //index 0 is unoccupied for simplicity
 int vars[27];
 
 bool valid_parenthesis(string e){
-    Stack s;
+    Stack<char> s;
     for(int i = 0; i < e.length(); i++){
         if(e[i] == ' ') continue;
         if(e[i] == ')' && s.is_empty()) return false;
@@ -25,24 +27,29 @@ bool valid_parenthesis(string e){
     return false;
 }
 
-bool is_number(int x){
-    if(x != '(' && x != ')' &&  x != '+' &&  x != '-' &&  x != '*' &&  x != '/' &&  x != '^'){
+bool is_number(char x){
+    if(x >= '0' && x <= '9'){
         return true;
     }
     return false;
 }
 
-bool is_op(int x){
+bool is_op(char x){
     if(x == '+' ||  x == '-' ||  x == '*' ||  x == '/' ||  x == '^'){
         return true;
     }
     return false;
 }
 
+bool is_paren(char x){
+    if(x == '(' || x == ')') return true;
+    return false;
+}
+
 bool has_contents(string e){
     int count = 0;
     for(int i = 0; i < e.length(); i++){
-        if(e[i] == '(' || e[i] == ')' || e[i] == ' ') continue;
+        if(is_paren(e[i]) || e[i] == ' ') continue;
         count++;
     }
     if(count > 0) return true;
@@ -60,12 +67,12 @@ string compress_exp(string e){
 }
 
 bool valid_op_layout(string e){
-    Stack s;
+    Stack<char> s;
     for(int i = 0; i < e.length(); i++){
         if(e[i] == ' ') continue;
         s.push(e[i]);
     }
-    vector<int> se = s.get_e();
+    vector<char> se = s.get_e();
     int sz = s.get_size();
     for(int i = 0; i < sz; i++){
         if(is_op(se[i])){
@@ -80,6 +87,7 @@ bool valid_op_layout(string e){
     return true;
 }
 
+//fix
 bool valid_vars(string e){
     for(int i = 0; i < e.length(); i++){
         if(!is_number(e[i]) && (e[i] < '0' || e[i] > '9') && (e[i] < 'a' || e[i] > 'z')) return false;
@@ -102,27 +110,29 @@ void input_vars(string e){
 
 int perf_op(int a){
     int ans = 0, pow = 0, og = 0;
+    Element s = sol.pop();
+    Element ev = eval.pop();
     switch(a){
         case '+':
-        ans = sol.pop() + eval.pop();
+        ans = s.value + ev.value;
         break;
 
         case '-':
-        ans = sol.pop() - eval.pop();
+        ans = s.value - ev.value;
         break;
 
         case '*':
-        ans = sol.pop() * eval.pop();
+        ans = s.value * ev.value;
         break;
 
         case '/':
-        ans = sol.pop() / eval.pop();
+        ans = s.value / ev.value;
         break;
 
         case '^':
-        og = sol.pop();
+        og = s.value;
         ans = og;
-        pow = eval.pop();
+        pow = ev.value;
         for(int i = 2; i <= pow; i++){
             ans *= og;
         }
@@ -133,30 +143,31 @@ int perf_op(int a){
 
 void eval_parenthesis(){
     cout << "Elements since open parenthesis: " << eOp_paren << endl;
-    int a = 0;
+    Element a;
     while(eOp_paren > 0){
         a = sol.pop();
-        cout << "Popped sol paren: " << a << endl;
+        cout << "Popped sol paren: " << a.value << endl;
         eOp_paren--;
         cout << "Elements since open parenthesis: " << eOp_paren << endl;
-        if(is_op(a) && is_number(sol.peek())){
-            cout << "Performing " << a << endl;
-            a = perf_op(a);
-            cout << "After: " << a << endl;
+        if(a.type == 0 && sol.peek().type == 1){
+            cout << "Performing " << a.value << endl;
+            a.value = perf_op(a.value);
+            a.type == 1;
+            cout << "After: " << a.value << endl;
             eval.push(a);
-            cout << "Pushed eval paren after: " << a << endl;
+            cout << "Pushed eval paren after: " << a.value << endl;
             eOp_paren -= 2;
         }
-        else if(is_number(a)){
+        else if(a.value == 1){
             eval.push(a);
-            cout << "Pushed eval paren number: " << a << endl;
+            cout << "Pushed eval paren number: " << a.value << endl;
         }
         
     }
     eOp_paren = eOp_num.pop() + 1;
-    int temp = eval.pop();
+    Element temp = eval.pop();
     sol.push(temp);
-    cout << "Pushed sol paren: " << temp << endl;
+    cout << "Pushed sol paren: " << temp.value << endl;
     eval.stack_clear();
     cout << endl;
     num_Op_paren--;
@@ -165,35 +176,38 @@ void eval_parenthesis(){
 }
 
 void eval_no_parenthesis(){
-    int a;
+    Element a;
     while(!sol.is_empty()){
         a = sol.pop();
-        cout << "Popped sol no paren: " << a << endl;
-        if(is_number(a)){
+        cout << "Popped sol no paren: " << a.value << endl;
+        if(a.type == 1){
             eval.push(a);
-            cout << "Pushed eval no paren num: " << a << endl;
+            cout << "Pushed eval no paren num: " << a.value << endl;
         }
-        else if(is_op(a) && is_number(sol.peek())){
-            a = perf_op(a);
+        else if(a.type == 0 && sol.peek().type == 1){
+            a.value = perf_op(a.value);
+            a.type == 1;
             eval.push(a);
-            cout << "Pushed eval no paren after: " << a << endl;
+            cout << "Pushed eval no paren after: " << a.value << endl;
         }
     }
     a = eval.pop();
-    cout << "Popped eval no paren: " << a << endl;
+    cout << "Popped eval no paren: " << a.value << endl;
     sol.push(a);
-    cout << "Pushed sol no paren afters: " << a << endl;
+    cout << "Pushed sol no paren afters: " << a.value << endl;
 }
 
 //currently unused 
 void eval_exponent(int x){
     cout << "performing expo" << endl;
     cout << x << endl;
-    int a = sol.pop();
-    cout << "Popped sol: " << a << endl;
-    int sum = a;
-    for(int i = 2; i <= x; i++) sum *= a;
-    sol.push(sum);
+    Element a = sol.pop();
+    cout << "Popped sol: " << a.value << endl;
+    int sum = a.value;
+    for(int i = 2; i <= x; i++) sum *= a.value;
+    a.value = sum;
+    a.type = 1;
+    sol.push(a);
     cout << "Pushed sol: " << sum << endl;
 }
 
@@ -210,53 +224,56 @@ string eval_exp(string e){
         }
         else if(isalpha(e[i])){
             //if previous is number, then multiply. ie. 5x, x = 6, 5(6) = 30
-            if(!sol.is_empty() && is_number(sol.peek())){
-                int x = sol.pop();
-                cout << "Multiplying variable " << e[i] << " with " << x << "..." << endl;
-                x *= vars[e[i] - '`'];
+            if(!sol.is_empty() && sol.peek().type == 1){
+                Element x = sol.pop();
+                cout << "Multiplying variable " << e[i] << " with " << x.value << "..." << endl;
+                x.value *= vars[e[i] - '`'];
                 sol.push(x);
-                cout << "Pushed sol varXnum: " << x << endl;
+                cout << "Pushed sol varXnum: " << x.value << endl;
             }
             //sub value of variable, push normally
             else{
-                sol.push(vars[e[i] - '`']);
-                cout << "Pushed sol var: " << vars[e[i]-'`'] << endl;
+                Element x = {vars[e[i] - '`'], 1};
+                sol.push(x);
+                cout << "Pushed sol var: " << x.value << endl;
             }
         }
-        else if(e[i] >= '0' && e[i] <= '9'){
+        else if(is_number(e[i])){
             //if number has two or more digits
-            if(!sol.is_empty() && is_number(sol.peek())){
-                int x = sol.pop();
-                cout << ">1 digits, value is: " << x << endl;
-                x = x*10 + (e[i] - '0');
-                cout << "New value: " << x << endl;
+            if(!sol.is_empty() && sol.peek().type == 1){
+                Element x = sol.pop();
+                cout << ">1 digits, value is: " << x.value << endl;
+                x.value = x.value*10 + (e[i] - '0');
+                cout << "New value: " << x.value << endl;
                 sol.push(x);
-                cout << "Pushed sol >number: " << x << endl;
+                cout << "Pushed sol >number: " << x.value << endl;
             }
-            //broken
-            else if(!sol.is_empty() && sol.peek() == '-' && is_op(e[i-2])){
+            else if(!sol.is_empty() && sol.peek().type == 0 && sol.peek().value == '-' && is_op(e[i-2])){
                 //negative number
                 sol.pop();
                 int a = e[i]-'0';
                 a -= a*2;
-                sol.push(a);
-                cout << "Pushed sol negative number: " << endl;
+                Element x = {a, 1};
+                sol.push(x);
+                cout << "Pushed sol negative number: " << x.value << endl;
             }
             else{
                 //single digit
-                sol.push(e[i]-'0');
-                cout << "Pushed sol reg number: " << e[i]-'0' << endl;
+                Element x = {e[i]-'0', 1};
+                sol.push(x);
+                cout << "Pushed sol reg number: " << x.value << endl;
             }
             if(act_paren) eOp_paren++;
         }
         else if(is_op(e[i])){
-            sol.push(e[i]);
-            cout << "Pushed sol op: " << e[i] << endl;
+            Element x = {e[i], 0};
+            sol.push(x);
+            cout << "Pushed sol op: " << x.value << endl;
             if(act_paren) eOp_paren++;
         }
         else if(e[i] == ')') eval_parenthesis();
     }
     if(!sol.is_empty() && sol.get_size() > 1) eval_no_parenthesis();
     
-    return to_string(sol.pop());
+    return to_string(sol.pop().value);
 }

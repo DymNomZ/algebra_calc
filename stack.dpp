@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+#include "element.h"
+#include "stack.h"
+
+using namespace std;
+
+template<typename T>
+Stack<T>::Stack(){
+
+}
+
+template<typename T>
+bool Stack<T>::is_empty(){
+    return stack_e.empty();
+}
+
+template<typename T>
+int Stack<T>::get_size(){
+    return stack_e.size();
+}
+
+template<typename T>
+vector<T> Stack<T>::get_e(){
+    return stack_e;
+}
+
+template<typename T>
+void Stack<T>::stack_clear(){
+    stack_e.clear();
+}
+
+template<typename T>
+void Stack<T>::test_print(){
+    for(int i = 0; i < stack_e.size(); i++){
+        //cout << stack_e[i]->value << " ";
+    }
+    cout << endl;
+}
+
+template<typename T>
+void Stack<T>::push(T x){
+    stack_e.push_back(x);
+}
+
+template<typename T>
+T Stack<T>::pop(){
+    T x = stack_e.back();
+    stack_e.pop_back();
+    return x;
+}
+
+template<typename T>
+T Stack<T>::peek(){
+    return stack_e.back();
+}
