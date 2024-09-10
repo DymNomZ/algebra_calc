@@ -8,12 +8,8 @@ bool is_paren(char);
 bool has_contents(string);
 string compress_exp(string);
 bool valid_op_layout(string);
-bool valid_vars(string);
-
-
 int perf_op(int);
 void eval_parenthesis(int);
 void eval_exponent(int);
-
 string eval_exp(string);
 void input_vars(string e);

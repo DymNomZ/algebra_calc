@@ -10,11 +10,14 @@ int main(){
     string exp;
 
     do{
-        cout << "Sample text....." << endl;
+        cout << "This here is my simple C++ algebra expression calculator" << endl;
+        cout << "It will evaluate with or without parenthesis or both ie. 1 + 2 or (50 * 3) or 17 / (11 + 2)" << endl;
+        cout << "It cannot evaluate perhaps \"advanced\" expressions such as 3x = 15, I made this for learning purposes" << endl;
         cout << "Only letters are to be used for variables (a-z), capital letters will be converted to lowercase" << endl;
-        cout << "Bug: ascii for operators -+/*^ can result to collision, ie. 47 and / (47)" << endl;
-        cout << "If ya'll have solutions for these bugs pls do send me a PR hehe Xp" << endl;
-        cout << "Note: use '^' for exponents" << endl << endl;
+        cout << "Therefore, other characters will be ignored" << endl;
+        cout << "If anyone cares enough to test and encounter a bug, an issue ticket is appreciated <3" << endl;
+        cout << "Note: use '^' for exponents" << endl;
+        cout << "_________________________________________________________________________________________________________" << endl;
         cout << "Enter expresion: " << endl;
         getline(cin, exp);
 
@@ -23,12 +26,9 @@ int main(){
         else if(!valid_op_layout(exp)) cout << "Invalid expression: Improper arrangement of operation/s" << endl << endl;
         else{
             exp = compress_exp(exp);
-            //if(!valid_vars(exp)) cout << "Invalid expression: invalid variable character" << endl << endl;
-            //else{
-                input_vars(exp);
-                cout << "Answer: " << endl;
-                cout << eval_exp(exp) << endl << endl;
-            //}
+            input_vars(exp);
+            cout << "Answer: " << endl;
+            cout << eval_exp(exp) << endl << endl;
         }
 
         cout << "Press any key to continue, Press e to exit..." << endl;

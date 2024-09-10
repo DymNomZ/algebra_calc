@@ -7,9 +7,6 @@
 using namespace std;
 
 Stack<Element> sol, eval;
-Stack<int> eOp_num;
-bool act_paren = false;
-int eOp_paren = 0, num_Op_paren = 0;
 //index 0 is unoccupied for simplicity
 int vars[27];
 
@@ -87,14 +84,6 @@ bool valid_op_layout(string e){
     return true;
 }
 
-//fix
-bool valid_vars(string e){
-    for(int i = 0; i < e.length(); i++){
-        if(!is_number(e[i]) && (e[i] < '0' || e[i] > '9') && (e[i] < 'a' || e[i] > 'z')) return false;
-    }
-    return true;
-}
-
 void input_vars(string e){
     for(int i = 0; i < e.length(); i++){
         if(isalpha(e[i])){
@@ -142,13 +131,10 @@ int perf_op(int a){
 }
 
 void eval_parenthesis(){
-    cout << "Elements since open parenthesis: " << eOp_paren << endl;
-    Element a;
-    while(eOp_paren > 0){
+    Element a = {0, 0};
+    while(a.type != 2){
         a = sol.pop();
         cout << "Popped sol paren: " << a.value << endl;
-        eOp_paren--;
-        cout << "Elements since open parenthesis: " << eOp_paren << endl;
         if(a.type == 0 && sol.peek().type == 1){
             cout << "Performing " << a.value << endl;
             a.value = perf_op(a.value);
@@ -156,23 +142,18 @@ void eval_parenthesis(){
             cout << "After: " << a.value << endl;
             eval.push(a);
             cout << "Pushed eval paren after: " << a.value << endl;
-            eOp_paren -= 2;
         }
-        else if(a.value == 1){
+        else if(a.type == 1){
             eval.push(a);
             cout << "Pushed eval paren number: " << a.value << endl;
         }
         
     }
-    eOp_paren = eOp_num.pop() + 1;
     Element temp = eval.pop();
     sol.push(temp);
     cout << "Pushed sol paren: " << temp.value << endl;
     eval.stack_clear();
-    cout << endl;
-    num_Op_paren--;
-    cout << "Parenthesis evaluation complete! Paren remaining: " << num_Op_paren << endl;
-    if(num_Op_paren == 0) act_paren = false;
+    cout << "Parenthesis evaluation complete!" << endl;
 }
 
 void eval_no_parenthesis(){
@@ -212,15 +193,12 @@ void eval_exponent(int x){
 }
 
 string eval_exp(string e){
-    eOp_paren = 0;
     for(int i = 0; i < e.length(); i++){
         //start of parenthesis
         if(e[i] == '('){
-            act_paren = true;
-            eOp_num.push(eOp_paren);
-            eOp_paren = 0;
-            num_Op_paren++;
-            cout << "Open parenthesis encountered! count: " << num_Op_paren << endl;
+            Element x = {e[i], 2};
+            sol.push(x);
+            cout << "Open parenthesis encountered!"<< endl;
         }
         else if(isalpha(e[i])){
             //if previous is number, then multiply. ie. 5x, x = 6, 5(6) = 30
@@ -263,15 +241,16 @@ string eval_exp(string e){
                 sol.push(x);
                 cout << "Pushed sol reg number: " << x.value << endl;
             }
-            if(act_paren) eOp_paren++;
         }
         else if(is_op(e[i])){
             Element x = {e[i], 0};
             sol.push(x);
             cout << "Pushed sol op: " << x.value << endl;
-            if(act_paren) eOp_paren++;
         }
-        else if(e[i] == ')') eval_parenthesis();
+        else if(e[i] == ')'){
+            cout << "Close parenthesis encountered! Evaluating..." << endl;
+            eval_parenthesis();
+        }
     }
     if(!sol.is_empty() && sol.get_size() > 1) eval_no_parenthesis();
     
