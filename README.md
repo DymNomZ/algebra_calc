@@ -9,5 +9,6 @@ It's simple in a way since it cannot evaluate perhaps "advanced" expressions suc
 because frankly I don't want to and I only made this as a challenge and for learning purposes. 
 
 If you look into the code, you can see that I made my own stack data structure because I didn't know that C++ has already a built-in stack data structure and could have saved lots of time 😀.
+.....and I also left the code for the stack trace, and that will serve as the only documentation for this program aside from the comments 😌
 
 That is all and if anyone cares enough to test and find bugs, an issue ticket is appreciated 💚
