@@ -6,9 +6,17 @@
 
 using namespace std;
 
-Stack<Element> sol, eval;
+Stack<Element> sol, eval, mdas;
+int has_E = 0, has_MD = 0, has_AS = 0;
 //index 0 is unoccupied for simplicity
 int vars[27];
+//not in here tho XD
+int ops[] = {94, 94, 42, 47, 43, 45};
+
+bool has_parenthesis(string e){
+    for(int i = 0; i < e.length(); i++) if(e[i] == '(' || e[i] == ')') return true;
+    return false;
+}
 
 bool valid_parenthesis(string e){
     Stack<char> s;
@@ -58,6 +66,10 @@ string compress_exp(string e){
     for(int i = 0; i < e.length(); i++){
         if(e[i] == ' ')continue;
         if(isalpha(e[i])) e[i] = tolower(e[i]);
+        //just included checker for different operators
+        if(e[i] == '^') has_E++;
+        if(e[i] == '*' || e[i] == '/') has_MD++;
+        if(e[i] == '+' || e[i] == '-') has_AS++;
         compressed += e[i];
     }
     return compressed;
@@ -99,27 +111,27 @@ void input_vars(string e){
 
 int perf_op(int a){
     int ans = 0, pow = 0, og = 0;
-    Element s = sol.pop();
     Element ev = eval.pop();
+    Element mds = mdas.pop();
     switch(a){
         case '+':
-        ans = s.value + ev.value;
+        ans = mds.value + ev.value;
         break;
 
         case '-':
-        ans = s.value - ev.value;
+        ans = mds.value - ev.value;
         break;
 
         case '*':
-        ans = s.value * ev.value;
+        ans = mds.value * ev.value;
         break;
 
         case '/':
-        ans = s.value / ev.value;
+        ans = mds.value / ev.value;
         break;
 
         case '^':
-        og = s.value;
+        og = mds.value;
         ans = og;
         pow = ev.value;
         for(int i = 2; i <= pow; i++){
@@ -130,66 +142,83 @@ int perf_op(int a){
     return ans;
 }
 
-void eval_parenthesis(){
+void unload(){
+    cout << "Unloading..." << endl;
     Element a = {0, 0};
     while(a.type != 2){
         a = sol.pop();
-        cout << "Popped sol paren: " << a.value << endl;
-        if(a.type == 0 && sol.peek().type == 1){
-            cout << "Performing " << a.value << endl;
-            a.value = perf_op(a.value);
-            a.type == 1;
-            cout << "After: " << a.value << endl;
+        cout << "Popped sol unload: " << a.value << endl;
+        if(a.type == 0){
             eval.push(a);
-            cout << "Pushed eval paren after: " << a.value << endl;
+            cout << "Pushed eval unload operator: " << a.value << endl;
         }
         else if(a.type == 1){
             eval.push(a);
-            cout << "Pushed eval paren number: " << a.value << endl;
+            cout << "Pushed eval unload number: " << a.value << endl;
         }
         
     }
-    Element temp = eval.pop();
-    sol.push(temp);
-    cout << "Pushed sol paren: " << temp.value << endl;
-    eval.stack_clear();
-    cout << "Parenthesis evaluation complete!" << endl;
 }
 
-void eval_no_parenthesis(){
-    Element a;
-    while(!sol.is_empty()){
-        a = sol.pop();
-        cout << "Popped sol no paren: " << a.value << endl;
-        if(a.type == 1){
+void reload(){
+    cout << "Reloading..." << endl;
+    Element a = {0, 0};
+    while(!mdas.is_empty()){
+        a = mdas.pop();
+        cout << "Popped mdas reload: " << a.value << endl;
+        if(a.type == 0){
             eval.push(a);
-            cout << "Pushed eval no paren num: " << a.value << endl;
+            cout << "Pushed eval reload operator: " << a.value << endl;
         }
-        else if(a.type == 0 && sol.peek().type == 1){
-            a.value = perf_op(a.value);
-            a.type == 1;
+        else if(a.type == 1){
             eval.push(a);
-            cout << "Pushed eval no paren after: " << a.value << endl;
+            cout << "Pushed eval reload number: " << a.value << endl;
         }
+        
     }
-    a = eval.pop();
-    cout << "Popped eval no paren: " << a.value << endl;
-    sol.push(a);
-    cout << "Pushed sol no paren afters: " << a.value << endl;
 }
 
-//currently unused 
-void eval_exponent(int x){
-    cout << "performing expo" << endl;
-    cout << x << endl;
-    Element a = sol.pop();
-    cout << "Popped sol: " << a.value << endl;
-    int sum = a.value;
-    for(int i = 2; i <= x; i++) sum *= a.value;
-    a.value = sum;
-    a.type = 1;
-    sol.push(a);
-    cout << "Pushed sol: " << sum << endl;
+void conduct_EMDAS(int idx){
+    cout << "Op nums: Exp: " << has_E << "MD: " << has_MD << "AS: " << has_AS << endl;
+    Element a = {0, 0};
+    while(!eval.is_empty()){
+        a = eval.pop();
+        cout << "Popped eval: " << a.value << endl;
+        if(a.type == 0 && eval.peek().type == 1 && (a.value == ops[idx] || a.value == ops[idx+1])){
+            cout << "Performing " << a.value << endl;
+            a.value = perf_op(a.value);
+            a.type = 1;
+            cout << "After: " << a.value << endl;
+            mdas.push(a);
+            cout << "Pushed mdas after: " << a.value << endl;
+            if(idx == 0) has_E--;
+            if(idx == 2) has_MD--;
+            if(idx == 4) has_AS--;
+            cout << "Op nums: Exp: " << has_E << "MD: " << has_MD << "AS: " << has_AS << endl;
+        }
+        else if(a.type == 0){
+            mdas.push(a);
+            cout << "Pushed mdas operator not priority: " << a.value << endl;
+        }
+        else if(a.type == 1){
+            mdas.push(a);
+            cout << "Pushed mdas number: " << a.value << endl;
+        }
+        
+    }
+    reload();
+}
+
+void evaluate(){
+    //unload from sol stack to eval stack
+    unload();
+    if(has_E > 0) conduct_EMDAS(0);
+    if(has_MD > 0) conduct_EMDAS(2);
+    if(has_AS > 0) conduct_EMDAS(4);
+    Element ans = eval.pop();
+    sol.push(ans);
+    cout << "Pushed sol: " << ans.value << endl;
+    eval.stack_clear();
 }
 
 string eval_exp(string e){
@@ -249,10 +278,10 @@ string eval_exp(string e){
         }
         else if(e[i] == ')'){
             cout << "Close parenthesis encountered! Evaluating..." << endl;
-            eval_parenthesis();
+            evaluate();
+            cout << "Parenthesis evaluation complete!" << endl;
         }
     }
-    if(!sol.is_empty() && sol.get_size() > 1) eval_no_parenthesis();
     
     return to_string(sol.pop().value);
 }
